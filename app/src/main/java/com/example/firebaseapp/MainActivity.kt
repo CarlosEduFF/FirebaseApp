@@ -1,6 +1,7 @@
 package com.example.firebaseapp
 
 import android.content.ContentValues
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -37,6 +38,7 @@ import com.example.firebaseapp.ui.theme.FirebaseAppTheme
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+
 
 class MainActivity : ComponentActivity() {
     val db = Firebase.firestore
@@ -135,25 +137,60 @@ fun App(db: FirebaseFirestore) {
         ) {
             Button(
                 onClick = {
-                    val city = hashMapOf(
+                    val pessoas = hashMapOf(
                         "nome" to nome,
                         "telefone" to telefone
                     )
-                    db.collection("pessoas").document("PrimeiroCliente")
-                        .set(city)
-                        .addOnSuccessListener { Log.d(ContentValues.TAG, "DocumentSnapshot successfully written") }
-                        .addOnFailureListener { e-> Log.w(ContentValues.TAG, "Error ", e) }
-
-                },
+                    db.collection("Cliente").add(pessoas)
+                        .addOnSuccessListener { documentReference ->
+                            Log.d(TAG, "DocumentSnapshot written with ID: ${documentReference.id}")
+                            Log.d(TAG, "Nome: $nome, Telefone: $telefone")
+                        }
+                        .addOnFailureListener { e -> Log.w(TAG, "Error adding document", e) }}, // Tag corrigida
                 colors = ButtonDefaults.buttonColors(  // Cor de fundo padrão
                     contentColor = Color.White // Cor do texto do botão
                     , containerColor = Color.Blue
                 ),
-                modifier = Modifier.padding(20.dp) // Espaçamento do botão
+                modifier = Modifier
+                    .padding(20.dp) // Espaçamento do botão
                     .width(150.dp) // Largura do botão
                     .height(50.dp)
             ) {
                 Text(text = "Cadastrar")
+            }
+        }
+        Row (
+            Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+        }
+        Row(
+            Modifier
+                .fillMaxWidth()
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth(0.3f)
+            ) {
+                Text(text = "Nome:")
+                Row (Modifier
+                    .fillMaxWidth()
+                ){
+                    Column (){
+                        db.collection("Clientes")
+                            .get()
+                            .addOnSuccessListener { documents ->
+                                for (document in documents) {
+                                    // ...
+                                    Log.d(TAG, "${document.id} => ${document.data}") // Tag corrigida
+                                }
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.w(TAG, "Error getting document: ", exception) // Tag corrigida
+                            }
+                    }
+                }
             }
         }
     }
